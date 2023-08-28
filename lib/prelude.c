@@ -7,6 +7,10 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 /*
  * Austral types
@@ -54,48 +58,18 @@ au_span_t au_make_span_from_string(const char* data, size_t size) {
 }
 
 void* au_stdout() {
-#if defined(__APPLE__)
-  extern void* __stdoutp;
-  return __stdoutp;
-#else
-  extern void* stdout;
   return stdout;
-#endif
 }
 
 void* au_stderr() {
-#if defined(__APPLE__)
-  extern void* __stderrp;
-  return __stderrp;
-#elif defined(__FreeBSD__)
-  extern void* __stderrp;
-  return __stderrp;
-#elif defined(__OpenBSD__)
-  extern void *__sF;
-  return &__sF[2];
-#else
-  extern void* stderr;
   return stderr;
-#endif
 }
 
 extern void* au_stdin() {
-#if defined(__APPLE__)
-  extern void* __stdinp;
-  return __stdinp;
-#else
-  extern void* stdin;
   return stdin;
-#endif
 }
 
 au_unit_t au_abort_internal(const char* message) {
-  extern int fprintf(void* stream, const char* format, ...);
-  extern int fflush(void* stream);
-  extern void _Exit(int status);
-
-  void* stderr = au_stderr();
-
   fprintf(stderr, "%s\n", message);
   fflush(stderr);
   _Exit(-1);
@@ -104,12 +78,6 @@ au_unit_t au_abort_internal(const char* message) {
 }
 
 au_unit_t au_abort(au_span_t message) {
-  extern int fprintf(void* stream, const char* format, ...);
-  extern int fflush(void* stream);
-  extern void _Exit(int status);
-
-  void* stderr = au_stderr();
-
   fprintf(stderr, "%s\n", (char*) message.data);
   fflush(stderr);
   _Exit(-1);
@@ -117,8 +85,6 @@ au_unit_t au_abort(au_span_t message) {
 }
 
 au_unit_t au_printf(const char* format, ...) {
-  extern int vprintf(const char* format, va_list arg);
-
   va_list args;
   va_start(args, format);
   vprintf(format, args);
@@ -146,32 +112,22 @@ void* au_array_index(au_span_t* array, size_t index, size_t elem_size) {
  */
 
 void* au_calloc(size_t size, size_t count) {
-  extern void* calloc(size_t count, size_t size);
-
   return calloc(size, count);
 }
 
 void* au_realloc(void* ptr, size_t count) {
-  extern void* realloc(void *ptr, size_t size);
-
   return realloc(ptr, count);
 }
 
 void* au_memmove(void* destination, void* source, size_t count) {
-  extern void* memmove(void* destination, void* source, size_t count);
-
   return memmove(destination, source, count);
 }
 
 void* au_memcpy(void* destination, void* source, size_t count) {
-  extern void* memcpy(void* destination, void* source, size_t count);
-
   return memcpy(destination, source, count);
 }
 
 au_unit_t au_free(void* ptr) {
-  extern void free(void* ptr);
-
   free(ptr);
   return nil;
 };
